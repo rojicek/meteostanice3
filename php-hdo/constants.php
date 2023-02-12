@@ -1,10 +1,8 @@
 <?php
 
-
- $openweather_api = "OPENWEATHER_API_KEY_REMOVED";
- $pwd="pa1e2";
-    
-    
+ // not in github
+ require_once '/var/www/rojicek.cz/web/db/weather-secrets.php';     
+ 
  //used in main, but let's keep it here   
  $low_temp = 6;
  $super_low_temp = -3;
