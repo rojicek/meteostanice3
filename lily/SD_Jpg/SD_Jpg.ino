@@ -10,6 +10,7 @@
 #include <TJpg_Decoder.h>
 
 #include "config.h"
+#include "i.h"
 
 // Include SD
 #define FS_NO_GLOBALS
@@ -21,6 +22,7 @@
 #define mySD_CS 4
 
 TTGOClass* ttgo;
+
 
 // Include the TFT library https://github.com/Bodmer/TFT_eSPI
 /*
@@ -36,9 +38,8 @@ TFT_eSPI tft = TFT_eSPI();         // Invoke custom library
 // you will need to adapt this function to suit.
 
 bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* bitmap) {
-  Serial.print("o");
   // Stop further decoding as image is running off bottom of screen
- // if (y >= ttgo->tft->height()) return 0;
+  if (y >= ttgo->tft->height()) return 0;
 
   // This function will clip the image block rendering automatically at the TFT boundaries
   ttgo->tft->pushImage(x, y, w, h, bitmap);
@@ -47,7 +48,6 @@ bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* bitmap) 
   // tft.drawRGBBitmap(x, y, bitmap, w, h);
 
   // Return 1 to decode next block
-  
   return 1;
 }
 
@@ -57,37 +57,46 @@ void setup() {
   Serial.println("\n\n Testing TJpg_Decoder library");
 
   // Initialise SD before TFT
+  /*
   if (!SD.begin(4)) {
     Serial.println(F("SD.begin failed!"));
     while (1)
       delay(10);
   }
   Serial.println("\r\nSD Initialisation done.");
-
+*/
   uint16_t w = 0, h = 0;
-  TJpgDec.getSdJpgSize(&w, &h, "/panda.jpg");
+  //TJpgDec.getSdJpgSize(&w, &h, "/panda.jpg");
+  //Serial.println("get SD img");
 
-  Serial.println("get SD img");
+  //TJpgDec.getJpgSize(&w, &h, ii, sizeof(ii));
 
 
-  Serial.println(w);
-  Serial.println(h);
-
+  //Serial.println(w);  //funguje pro sd i h
+  //Serial.println(h);  //funguje pro sd i h
+  Serial.println(sizeof(ii));
 
 
   ttgo = TTGOClass::getWatch();
   ttgo->begin();
   ttgo->openBL();
-  //ttgo->tft->setRotation(3);
+  ttgo->tft->setRotation(3);
 
-  //ttgo->tft->fillScreen(TFT_RED);
-
-  TJpgDec.setJpgScale(1);
+  ttgo->tft->fillScreen(TFT_RED);
 
   // The decoder must be given the exact name of the rendering function above
   TJpgDec.setCallback(tft_output);
+  TJpgDec.setJpgScale(1);
+  TJpgDec.setSwapBytes(true);
 
-  TJpgDec.drawSdJpg(0, 0, "/panda.jpg");
+  //TJpgDec.drawJpg(0, 0, ii, sizeof(ii));
+
+  ttgo->tft->pushImage(0, 0, 8, 8, ii);
+  //
+
+
+
+  //TJpgDec.drawSdJpg(0, 0, "/panda.jpg");
 
 
   /*
@@ -98,11 +107,13 @@ void setup() {
   tft.setSwapBytes(true); // We need to swap the colour bytes (endianess)
 */
   // The jpeg image can be scaled by a factor of 1, 2, 4, or 8
+
+  Serial.println("konec init");
 }
 
 void loop() {
 
-return;
+  return;
   //ttgo->tft->fillScreen(TFT_GREEN);
 
   // Time recorded for test purposes
