@@ -7,27 +7,48 @@
 #include "config.h"
 
 //fonty
-#include "ubuntu_reg.h"
-#include "ubuntu_bold.h"
+#include "ubuntu_fonts.h"
 
-//#include "ubuntu_light.h "
 
 TTGOClass* ttgo;
+
+int w = 0;
+int h = 0;
 
 #define drawPixel(a, b, c) \
   ttgo->tft->setAddrWindow(a, b, a, b); \
   ttgo->tft->pushColor(c)
 
+void drawPic(int x, int y, int h, int w, String pic) {
+  File picFile = SD.open("/layout/sunset.raw", FILE_READ);
 
-void drawRect(int x, int y, int w, int h, unsigned int c) {
-  for (int ix = x; ix < x + w; ix++)
-    for (int iy = y; iy < y + h; iy++) {
-      drawPixel(ix, iy, c);
+  if (picFile) {
+    for (int i = x; i < x + w; i++) {
+      for (int j = y; j < y + h; j++) {
+
+        char rgb1 = picFile.read();
+        char rgb2 = picFile.read();
+
+        drawPixel(j, i, 256 * rgb1 + rgb2);
+      }
     }
+    close(picFile);
+  } else {
+    Serial.print("cant read ");
+    Serial.println(pic);
+  }
 }
 
 void setup() {
   Serial.begin(115200);
+
+  //SD karta
+  if (!SD.begin(4)) {
+    Serial.println("initialization failed!");
+    while (1)
+      ;  // bacha - tohle je nekonecna smycka
+  }
+  Serial.println("initialization done.");
 
   ttgo = TTGOClass::getWatch();
   ttgo->begin();
@@ -36,11 +57,17 @@ void setup() {
 
   ttgo->tft->fillScreen(TFT_WHITE);
 
-  //umisti bloky a texty
-  //meteoikona
-  drawRect(30, 10, 150, 150, TFT_RED);
+  ttgo->tft->loadFont(ubuntu_regular_18);
+  ttgo->tft->setTextColor(TFT_BLACK);
+  ttgo->tft->setCursor(15, 15);
+  ttgo->tft->print("6:00");
+
+  //printText()
+  drawPic(15, 15, 35, 28, "/layout/sunset.raw");
+
 
   //cas
+  /*
   ttgo->tft->loadFont(ubuntu_reg_25);
   ttgo->tft->setTextColor(TFT_BLACK);
   ttgo->tft->setCursor(300, 10);
@@ -55,6 +82,7 @@ void setup() {
   ttgo->tft->setTextColor(TFT_BLACK);
   ttgo->tft->setCursor(120, 180);
   ttgo->tft->print("25°C");
+  */
 }
 
 
