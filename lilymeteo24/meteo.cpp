@@ -90,6 +90,9 @@ int kolik_je_prunik(unsigned long start1, unsigned long end1, unsigned long star
 
 meteo_data update_meteo() {
   meteo_data md;
+  // vynulovat: pri chybe se jinak vraci neinicializovane hodnoty
+  memset(&md, 0, sizeof(md));
+  md.valid = false;
 
   //StaticJsonDocument<1000> w_doc;
   JsonDocument w_doc;
@@ -143,8 +146,11 @@ meteo_data update_meteo() {
     else
       md.sunlight = 0;
 
-    strcpy(md.w_icon, w_doc["weather"]["w_icon"]);
-    strcpy(md.trend_icon, w_doc["weather"]["temp_trend_icon"]);
+    // vzdy ukoncit na velikosti pole, server muze poslat cokoliv
+    strncpy(md.w_icon, w_doc["weather"]["w_icon"] | "", sizeof(md.w_icon) - 1);
+    md.w_icon[sizeof(md.w_icon) - 1] = '\0';
+    strncpy(md.trend_icon, w_doc["weather"]["temp_trend_icon"] | "", sizeof(md.trend_icon) - 1);
+    md.trend_icon[sizeof(md.trend_icon) - 1] = '\0';
 
     md.trend_temp = w_doc["weather"]["temp_trend"];
 
@@ -153,7 +159,8 @@ meteo_data update_meteo() {
     md.clc_tmr = w_doc["weather"]["clc_tmr"];
 
 
-    strcpy(md.aqi, w_doc["weather"]["aqi"]);
+    strncpy(md.aqi, w_doc["weather"]["aqi"] | "", sizeof(md.aqi) - 1);
+    md.aqi[sizeof(md.aqi) - 1] = '\0';
 
     //get hdo info
     md.hdo1 = -1;
@@ -296,9 +303,10 @@ void update_all_elements(meteo_data md, int vsechno_prepis) {
 
   //drawBox(30, 50, 200, 150, TFT_SKYBLUE); //show icon box
   //prekreslim pokazde - je to jedno
-  char w_icon_path[22];
+  // "/meteo/weather/" (15) + w_icon (max 3) + ".raw" (4) + '\0' = 23
+  char w_icon_path[32];
   strcpy(w_icon_path, "/meteo/weather/");
-  strcat(w_icon_path, md.w_icon);
+  strncat(w_icon_path, md.w_icon, sizeof(w_icon_path) - strlen(w_icon_path) - 5);
   strcat(w_icon_path, ".raw");
   drawPic(ICON_WEATHER_x, ICON_WEATHER_y, ICON_WEATHER_width, ICON_WEATHER_height, w_icon_path);
 

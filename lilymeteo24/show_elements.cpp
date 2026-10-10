@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "show_elements.h"
 #include "ubuntu_fonts.h"
 
@@ -32,12 +34,28 @@ void drawPic(int x, int y, int dimx, int dimy, String pic) {
   //Serial.println("<<<");
 
 
-  if (picFile == 1) {
+  if (picFile) {
 
-    uint8_t* pbuffer = nullptr;
-    pbuffer = (uint8_t*)malloc(dimx * dimy * 2);
+    size_t potreba = (size_t)dimx * dimy * 2;
+    uint8_t* pbuffer = (uint8_t*)malloc(potreba);
 
-    picFile.read(pbuffer, dimx * dimy * 2);
+    if (pbuffer == nullptr) {
+      Serial.print(pic);
+      Serial.println(".. malo pameti");
+      picFile.close();
+      return;
+    }
+
+    // soubor musi mit presne tolik bajtu, kolik kreslim
+    size_t precteno = picFile.read(pbuffer, potreba);
+    if (precteno != potreba) {
+      Serial.print(pic);
+      Serial.print(".. spatna velikost, ma ");
+      Serial.print((unsigned)picFile.size());
+      Serial.print(" B, potreba ");
+      Serial.println((unsigned)potreba);
+      memset(pbuffer + precteno, 0, potreba - precteno);  // zbytek cerny
+    }
 
     for (int i = x; i < x + dimx; i++) {
       for (int j = y; j < y + dimy; j++) {
@@ -48,7 +66,7 @@ void drawPic(int x, int y, int dimx, int dimy, String pic) {
       }
     }
 
-    if (pbuffer) free(pbuffer);
+    free(pbuffer);
 
     //Serial.print(pic);
     //Serial.println(".. ok!");
@@ -66,7 +84,7 @@ void drawPic(int x, int y, int dimx, int dimy, String pic) {
     }
   }
 
-  close(picFile);
+  picFile.close();
 }
 
 void drawBox(int x, int y, int w, int h, uint16_t color, int okraj) {
