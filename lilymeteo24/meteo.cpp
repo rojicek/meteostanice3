@@ -7,6 +7,7 @@
 #include <ESP32Time.h>
 
 #include "meteo.h"
+#include "secrets.h"
 #include "ubuntu_fonts.h"
 #include "show_elements.h"
 
@@ -93,7 +94,7 @@ meteo_data update_meteo() {
   //StaticJsonDocument<1000> w_doc;
   JsonDocument w_doc;
   HTTPClient http;
-  String url = "https://www.rojicek.cz/meteo/meteo-query.php?pwd=pa1e2";
+  String url = "https://www.rojicek.cz/meteo/meteo-query.php?pwd=" + String(METEO_PWD);
 
   http.begin(url.c_str());
 

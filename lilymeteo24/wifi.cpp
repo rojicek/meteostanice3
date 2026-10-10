@@ -1,13 +1,8 @@
 #include <WiFi.h>
+#include "secrets.h"  // hesla: viz secrets.h.example
 
-const char* wifi_ap = "R_host";
-const char* wifi_pd = "badenka5";
-
-//const char* wifi_ap = "RFM2";
-//const char* wifi_pd = "ada3022001";
-
-//const char* wifi_ap = "TP-Link_AE38";
-//const char* wifi_pd = "48120104";
+const char* wifi_ap = WIFI_SSID;
+const char* wifi_pd = WIFI_PASSWORD;
 
 ///////////////////////
 int wifi_connect() {
